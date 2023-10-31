@@ -34,6 +34,24 @@ const ProductTable = ({ products }) => {
     }
   }, [id]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sortValue = params.get('sort');
+    if (sortValue) {
+      handleSortChange(sortValue);
+    }
+  }, []);
+
+  const setQuery = (name, value) => {
+    let params = new URLSearchParams(window.location.search);
+    if (value) {
+      params.set(name, value);
+    } else {
+      params.delete(name);
+    }
+    window.history.pushState(null, '', "?" + params.toString());
+  };
+
   const handleSortChange = (value) => {
     let sorted = [...products];
     switch (value) {
@@ -74,6 +92,7 @@ const ProductTable = ({ products }) => {
         sorted.sort((a, b) => b.stock - a.stock);
     }
     setSortedProducts(sorted);
+    setQuery('sort', value);
   };
 
   const handleSearchChange = (e) => {
@@ -89,7 +108,7 @@ const ProductTable = ({ products }) => {
       title: "Название",
       dataIndex: "title",
       key: "title",
-      render: (text) => <Link to={`/product/${text.id}`}>{text}</Link>,
+      render: (text, record) => <Link to={`/products/${record.title.replace(/\s+/g, '_').toLowerCase()}`}>{text}</Link>,
     },
     {
       title: "Цена",
@@ -138,6 +157,7 @@ const ProductTable = ({ products }) => {
         style={{ width: 200, marginBottom: 16 }}
         onChange={handleSortChange}
       >
+        <Option value="name_asc">Название (A - Z)</Option>
         <Option value="name_desc">Название (Z - A)</Option>
         <Option value="brand_asc">Бренд (A - Z)</Option>
         <Option value="brand_desc">Бренд (Z - A)</Option>
@@ -147,8 +167,8 @@ const ProductTable = ({ products }) => {
         <Option value="discount_desc">Скидка (по убыванию)</Option>
         <Option value="rating_asc">Рейтинг (по возрастанию)</Option>
         <Option value="rating_desc">Рейтинг (по убыванию)</Option>
-        <Option value="stock_asc">Наличие на складе (по возрастанию)</Option>
-        <Option value="stock_desc">Наличие на складе (по убыванию)</Option>
+        <Option value="stock_asc">Количество на складе (по возрастанию)</Option>
+        <Option value="stock_desc">Количество на складе (по убыванию)</Option>
       </Select>
       <Table dataSource={filteredProducts} columns={columns} rowKey="id" />
     </>
