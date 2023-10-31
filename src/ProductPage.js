@@ -1,50 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Col, Row } from "antd";
-import axios from 'axios';
-const ProductPage = () => {
-    const { id } = useParams();
-    const [product, setProduct] = useState(null);
+import { Card, Row, Col, Image } from 'antd';
+
+const ProductPage = ({ products }) => {
+  const { title } = useParams();
   
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
-            const response = await axios.get(`https://dummyjson.com/products/${id}`);
-            setProduct(response.data);
-          } catch (error) {
-            console.error("Ошибка при получении данных о товаре", error);
-          }
-        };
-    
-        if (id) {
-          fetchData();
-        }
-      }, [id]);
-  
-    return (
-        <div style={{ padding: "20px" }}>
-        <Row gutter={16}>
-          <Col span={8}>
-            <Card
-              hoverable
-              cover={<img alt={product.name} src={product.imageUrl} />}
-            >
-              <Card.Meta title={product.name} description={`Цена: ${product.price} руб.`} />
-            </Card>
-          </Col>
-          <Col span={16}>
-            <Card title="Описание товара">
-              <p>{product.description}</p>
-              <p><strong>Бренд:</strong> {product.brand}</p>
-              <p><strong>Рейтинг:</strong> {product.rating}</p>
-              <p><strong>Количество на складе:</strong> {product.stock}</p>
-              // Добавьте другую нужную информацию
-            </Card>
-          </Col>
-        </Row>
-      </div>
-    );
-  };
-  
-  export default ProductPage;
-  
+  const product = products.find(p => p.title.toLowerCase() === title.replace(/_/g, ' ').toLowerCase());
+
+  if (!product) {
+    return <div>Товар не найден</div>;
+  }
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Row gutter={16}>
+        <Col span={10}>
+          <Card 
+            style={{ width: '100%' }} 
+            cover={<Image width={'100%'} alt={product.title} src={product.thumbnail} />}
+          />
+        </Col>
+        <Col span={14}>
+          <Card 
+            style={{ width: 300 }} 
+            title={product.title}
+          >
+            <p>Бренд: {product.brand}</p>
+            <p>Количество на складе: {product.stock}</p>
+            <p>Рейтинг: {product.rating}</p>
+            <p>Скидка: {product.discountPercentage}%</p>
+          </Card>
+          <Card 
+            style={{ width: 300, marginTop: 16 }} 
+            title="Цена"
+          >
+            ${product.price}
+          </Card>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+export default ProductPage;
